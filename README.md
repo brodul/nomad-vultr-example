@@ -1,4 +1,15 @@
-# Nomad balkan BBQ
+# Nomad on Vultr
+
+An example repo of running Hashicorp Nomad on Vultr with Traefik as a reverse proxy.
+
+Slides can be found here:
+
+https://2ly.link/1xvZY
+
+
+## Intro
+
+## IaaC with Terraform
 
 Change the cloud init:
 - set user for nomad server/client
