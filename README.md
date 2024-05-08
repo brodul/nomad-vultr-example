@@ -7,8 +7,6 @@ Slides can be found here:
 https://2ly.link/1xvZY
 
 
-## Intro
-
 ## IaaC with Terraform
 
 Change the cloud init:
