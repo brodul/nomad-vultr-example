@@ -1,0 +1,61 @@
+## template: jinja
+#cloud-config
+
+package_update: true     # Update the apt database
+package_upgrade: true   # Upgrade the instance's packages
+
+apt:
+  sources:
+    hashicorp.list:
+      source: "deb https://apt.releases.hashicorp.com $RELEASE main"
+      keyid: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
+    docker.list:
+      source: "deb https://download.docker.com/linux/debian $RELEASE stable"
+      keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+
+packages:
+  - nomad
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+write_files:
+  - path: /etc/nomad.d/nomad.hcl
+    content: |
+      data_dir  = "/opt/nomad/data"
+      bind_addr = "0.0.0.0"
+
+      advertise {
+        http = "{{ ds.meta_data.interfaces[0].ipv4.address }}"
+        rpc  = "{{ ds.meta_data.interfaces[0].ipv4.address }}"
+        serf = "{{ ds.meta_data.interfaces[0].ipv4.address }}"
+      }
+
+      acl {
+        enabled = true
+      }
+
+      server {
+        enabled          = true
+        bootstrap_expect = ${server_count}
+
+        server_join {
+          retry_join = ["${first_server_ip}"]
+        }
+      }
+      client {
+        enabled = true
+      }
+    owner: 'root:root'
+    permissions: '0644'
+
+
+runcmd:
+  - [ "ufw", "disable" ]
+  - [ systemctl, daemon-reload ]
+  - [ systemctl, enable, docker.service ]
+  - [ systemctl, start, docker.service ]
+  - [ systemctl, enable, nomad.service ]
+  - [ systemctl, start, nomad.service ]
